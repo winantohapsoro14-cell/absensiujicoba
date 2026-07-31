@@ -1,20 +1,31 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Aplikasi Absensi QR - SMAN 8 Raja Ampat</title>
+  <title>ABSENSI ONLINE QR CODE SMA NEGERI 8 RAJA AMPAT</title>
+
+  <!-- Favicon Logo Sekolah Direct Link -->
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgm1RML72f-C_B7lxppP2uTyCicbTRkYyX5o_lpL-6T4vv-ZLuf1I0AO1j_Bda_JT9fNX4SflT56xsyT4Q43Hu98nqHIuGGY30iupbiLvEwsKNEh46Fw-lacUpepFJ9bu69VxMP3DCtkXERPHkyIgVJSb99E16G9mfmb_xb-KFV9iPcGDoK9kH66S_tJZIm/s591/WhatsApp_Image_2025-08-01_at_05.50.39-removebg-preview.png">
 
   <!-- Pustaka External -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Pustaka SheetJS untuk Export Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #475569; }
     #reader video { width: 100% !important; height: auto !important; border-radius: 0.75rem; object-fit: cover; }
     @media print {
       body * { visibility: hidden; }
@@ -23,59 +34,71 @@
     }
   </style>
 </head>
-<body class="bg-[#f1f5f9] font-sans flex flex-col md:flex-row h-screen overflow-hidden text-slate-700">
+<body class="bg-[#f1f5f9] dark:bg-slate-900 font-sans flex flex-col md:flex-row h-screen overflow-hidden text-slate-700 dark:text-slate-200 transition-colors duration-200">
 
   <!-- ========================================== -->
   <!-- 1. SIDEBAR / NAVBAR RESPONSIVE             -->
   <!-- ========================================== -->
-  <aside class="w-full md:w-64 bg-white border-b md:border-r border-slate-200 flex flex-col justify-between h-auto md:h-screen shrink-0 shadow-sm z-10">
+  <aside class="w-full md:w-64 bg-white dark:bg-slate-800 border-b md:border-r border-slate-200 dark:border-slate-700 flex flex-col justify-between h-auto md:h-screen shrink-0 shadow-sm z-10 transition-colors duration-200">
     <div class="p-4 md:p-5 overflow-y-auto">
-      <div class="text-center mb-4 md:mb-6 flex justify-between items-center md:block">
-        <div>
-          <h2 class="font-extrabold text-slate-800 text-xs md:text-sm tracking-wide uppercase" id="sidebarTitle">OPERATOR PETUGAS ABSENSI</h2>
-          <p class="text-[10px] md:text-xs text-slate-500 font-medium mt-0.5" id="sidebarSub">SMAN 8 RAJA AMPAT</p>
+      
+      <!-- LOGO DAN JUDUL SEKOLAH -->
+      <div class="text-center mb-4 md:mb-6 flex justify-between items-center md:flex-col md:justify-center">
+        <div class="flex flex-col items-center w-full">
+          <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgm1RML72f-C_B7lxppP2uTyCicbTRkYyX5o_lpL-6T4vv-ZLuf1I0AO1j_Bda_JT9fNX4SflT56xsyT4Q43Hu98nqHIuGGY30iupbiLvEwsKNEh46Fw-lacUpepFJ9bu69VxMP3DCtkXERPHkyIgVJSb99E16G9mfmb_xb-KFV9iPcGDoK9kH66S_tJZIm/s591/WhatsApp_Image_2025-08-01_at_05.50.39-removebg-preview.png" alt="Logo SMAN 8 Raja Ampat" class="w-14 h-14 md:w-20 md:h-20 object-contain mb-2 drop-shadow-sm">
+          
+          <h2 class="font-extrabold text-slate-800 dark:text-slate-100 text-xs md:text-sm tracking-wide uppercase leading-tight text-center" id="sidebarTitle">
+            ABSENSI ONLINE QR CODE SMA NEGERI 8 RAJA AMPAT
+          </h2>
         </div>
-        <div class="md:hidden text-[10px] text-rose-500 font-bold">SUPERADMIN</div>
+        <div class="md:hidden flex items-center gap-2">
+          <!-- Tombol Dark Mode Mobile -->
+          <button onclick="toggleDarkMode()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+            <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+            <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+          </button>
+          <div class="text-[10px] text-cyan-600 dark:text-cyan-400 font-bold whitespace-nowrap">PETUGAS ABSENSI</div>
+        </div>
       </div>
 
       <nav class="flex md:flex-col overflow-x-auto md:overflow-visible gap-1 text-xs md:text-sm pb-2 md:pb-0">
         <button onclick="switchMenu('dashboard')" id="menu-dashboard" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 bg-[#00bcd4] text-white font-semibold rounded-lg shadow-sm transition">
           <i data-lucide="layout-grid" class="w-4 h-4"></i> Dashboard
         </button>
-        <button onclick="switchMenu('scanner')" id="menu-scanner" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('scanner')" id="menu-scanner" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="camera" class="w-4 h-4"></i> Pos Scanner QR
         </button>
-        <button onclick="switchMenu('absensi-siswa')" id="menu-absensi-siswa" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('absensi-siswa')" id="menu-absensi-siswa" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="user-check" class="w-4 h-4"></i> Absensi Siswa
         </button>
-        <button onclick="switchMenu('absensi-guru')" id="menu-absensi-guru" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('absensi-guru')" id="menu-absensi-guru" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="briefcase" class="w-4 h-4"></i> Absensi Guru
         </button>
-        <button onclick="switchMenu('generate-qr')" id="menu-generate-qr" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('generate-qr')" id="menu-generate-qr" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="qr-code" class="w-4 h-4"></i> Generate & Cetak QR
         </button>
-        <button onclick="switchMenu('data-siswa')" id="menu-data-siswa" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('data-siswa')" id="menu-data-siswa" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="users" class="w-4 h-4"></i> Data Siswa
         </button>
-        <button onclick="switchMenu('data-guru')" id="menu-data-guru" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('data-guru')" id="menu-data-guru" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="user-cog" class="w-4 h-4"></i> Data Guru
         </button>
-        <button onclick="switchMenu('generate-laporan')" id="menu-generate-laporan" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('generate-laporan')" id="menu-generate-laporan" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="printer" class="w-4 h-4"></i> Generate Laporan
         </button>
-        <button onclick="switchMenu('pengaturan')" id="menu-pengaturan" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+        <button onclick="switchMenu('pengaturan')" id="menu-pengaturan" class="whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
           <i data-lucide="settings" class="w-4 h-4"></i> Pengaturan
         </button>
       </nav>
     </div>
 
     <!-- Status Indikator Koneksi GAS -->
-    <div class="p-3 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-500 flex items-center justify-between">
+    <div class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
       <span class="flex items-center gap-1.5">
         <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
         <span id="statusText">Cek Koneksi...</span>
       </span>
-      <button onclick="fetchDashboardData()" title="Sinkronkan Data" class="hover:text-cyan-600 transition">
+      <button onclick="fetchDashboardData()" title="Sinkronkan Data" class="hover:text-cyan-600 dark:hover:text-cyan-400 transition">
         <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
       </button>
     </div>
@@ -86,11 +109,23 @@
   <!-- ========================================== -->
   <div class="flex-1 flex flex-col h-screen overflow-y-auto">
 
-    <header class="hidden md:flex px-8 py-4 justify-between items-center bg-slate-100 border-b border-slate-200">
-      <h1 id="pageTitle" class="text-xl font-semibold text-slate-700">Dashboard</h1>
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2 text-rose-500 font-bold text-xs">
-          <i data-lucide="user" class="w-4 h-4"></i> USER : SUPERADMIN
+    <!-- HEADER FITUR MODE GELAP & FULLSCREEN -->
+    <header class="hidden md:flex px-8 py-4 justify-between items-center bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <h1 id="pageTitle" class="text-xl font-semibold text-slate-700 dark:text-slate-100">Dashboard</h1>
+      <div class="flex items-center gap-3">
+        <!-- Tombol Fullscreen -->
+        <button onclick="toggleFullscreen()" class="p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 transition shadow-sm" title="Layar Penuh / Fullscreen">
+          <i data-lucide="maximize" id="fullscreenIcon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Tombol Dark Mode Desktop -->
+        <button onclick="toggleDarkMode()" class="p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 transition shadow-sm" title="Ganti Tema Mode Gelap/Terang">
+          <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+        </button>
+
+        <div class="flex items-center gap-2 text-cyan-700 dark:text-cyan-300 font-bold text-xs bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200 dark:border-cyan-800 px-3 py-1.5 rounded-lg shadow-sm">
+          <i data-lucide="user-check" class="w-4 h-4 text-cyan-600 dark:text-cyan-400"></i> USER : PETUGAS ABSENSI
         </div>
       </div>
     </header>
@@ -102,54 +137,54 @@
         
         <!-- CARD STATISTIK -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex flex-col justify-between">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 flex flex-col justify-between transition-colors duration-200">
             <div class="flex justify-between items-start">
               <div class="w-10 h-10 md:w-12 md:h-12 bg-[#9c27b0] rounded-xl flex items-center justify-center text-white shadow-md"><i data-lucide="user" class="w-5 h-5 md:w-6 md:h-6"></i></div>
               <div class="text-right">
-                <p class="text-[10px] md:text-xs text-slate-400 font-medium">Jumlah siswa</p>
-                <p class="text-2xl md:text-3xl font-bold text-slate-700 mt-1" id="totalSiswa">--</p>
+                <p class="text-[10px] md:text-xs text-slate-400 dark:text-slate-400 font-medium">Jumlah siswa</p>
+                <p class="text-2xl md:text-3xl font-bold text-slate-700 dark:text-slate-100 mt-1" id="totalSiswa">--</p>
               </div>
             </div>
-            <div class="border-t border-slate-100 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3 text-purple-600"></i> Terdaftar</div>
+            <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3 text-purple-600"></i> Terdaftar</div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex flex-col justify-between">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 flex flex-col justify-between transition-colors duration-200">
             <div class="flex justify-between items-start">
               <div class="w-10 h-10 md:w-12 md:h-12 bg-[#4caf50] rounded-xl flex items-center justify-center text-white shadow-md"><i data-lucide="user-check" class="w-5 h-5 md:w-6 md:h-6"></i></div>
               <div class="text-right">
-                <p class="text-[10px] md:text-xs text-slate-400 font-medium">Jumlah guru</p>
-                <p class="text-2xl md:text-3xl font-bold text-slate-700 mt-1" id="totalGuru">--</p>
+                <p class="text-[10px] md:text-xs text-slate-400 dark:text-slate-400 font-medium">Jumlah guru</p>
+                <p class="text-2xl md:text-3xl font-bold text-slate-700 dark:text-slate-100 mt-1" id="totalGuru">--</p>
               </div>
             </div>
-            <div class="border-t border-slate-100 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3 text-emerald-600"></i> Terdaftar</div>
+            <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3 text-emerald-600"></i> Terdaftar</div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex flex-col justify-between">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 flex flex-col justify-between transition-colors duration-200">
             <div class="flex justify-between items-start">
               <div class="w-10 h-10 md:w-12 md:h-12 bg-[#00bcd4] rounded-xl flex items-center justify-center text-white shadow-md"><i data-lucide="star" class="w-5 h-5 md:w-6 md:h-6"></i></div>
               <div class="text-right">
-                <p class="text-[10px] md:text-xs text-slate-400 font-medium">Kelas / Jurusan</p>
-                <p class="text-2xl md:text-3xl font-bold text-slate-700 mt-1">6 / 2</p>
+                <p class="text-[10px] md:text-xs text-slate-400 dark:text-slate-400 font-medium">Kelas / Jurusan</p>
+                <p class="text-2xl md:text-3xl font-bold text-slate-700 dark:text-slate-100 mt-1">6 / 2</p>
               </div>
             </div>
-            <div class="border-t border-slate-100 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="home" class="w-3 h-3"></i> SMAN 8 Raja Ampat</div>
+            <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="home" class="w-3 h-3"></i> SMA Negeri 8 Raja Ampat</div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex flex-col justify-between">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 flex flex-col justify-between transition-colors duration-200">
             <div class="flex justify-between items-start">
               <div class="w-10 h-10 md:w-12 md:h-12 bg-[#f44336] rounded-xl flex items-center justify-center text-white shadow-md"><i data-lucide="settings" class="w-5 h-5 md:w-6 md:h-6"></i></div>
               <div class="text-right">
-                <p class="text-[10px] md:text-xs text-slate-400 font-medium">Jumlah petugas</p>
-                <p class="text-2xl md:text-3xl font-bold text-slate-700 mt-1">20</p>
+                <p class="text-[10px] md:text-xs text-slate-400 dark:text-slate-400 font-medium">Jumlah petugas</p>
+                <p class="text-2xl md:text-3xl font-bold text-slate-700 dark:text-slate-100 mt-1">20</p>
               </div>
             </div>
-            <div class="border-t border-slate-100 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> Petugas & Admin</div>
+            <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i> Petugas Absensi</div>
           </div>
         </div>
 
         <!-- RINCIAN REKAP HARIAN -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden transition-colors duration-200">
             <div class="bg-[#9c27b0] text-white px-5 py-3.5 flex justify-between items-center">
               <div>
                 <h3 class="font-semibold text-sm">Absensi Siswa Hari Ini</h3>
@@ -157,16 +192,16 @@
               </div>
               <span class="text-[11px] bg-purple-900/30 px-2 py-0.5 rounded font-mono" id="tglSiswa">...</span>
             </div>
-            <div class="p-4 grid grid-cols-5 text-center divide-x divide-slate-100 text-xs">
-              <div><p class="text-emerald-600 font-bold mb-1">Hadir</p><p class="text-slate-700 font-semibold text-base" id="siswaHadir">0</p></div>
-              <div><p class="text-amber-500 font-bold mb-1">Sakit</p><p class="text-slate-700 font-semibold text-base" id="siswaSakit">0</p></div>
-              <div><p class="text-cyan-500 font-bold mb-1">Izin</p><p class="text-slate-700 font-semibold text-base" id="siswaIzin">0</p></div>
-              <div><p class="text-rose-500 font-bold mb-1">Alfa</p><p class="text-slate-700 font-semibold text-base" id="siswaAlfa">0</p></div>
-              <div><p class="text-purple-600 font-bold mb-1">Total</p><p class="text-slate-700 font-semibold text-base" id="siswaTotal">0</p></div>
+            <div class="p-4 grid grid-cols-5 text-center divide-x divide-slate-100 dark:divide-slate-700 text-xs">
+              <div><p class="text-emerald-600 dark:text-emerald-400 font-bold mb-1">Hadir</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="siswaHadir">0</p></div>
+              <div><p class="text-amber-500 dark:text-amber-400 font-bold mb-1">Sakit</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="siswaSakit">0</p></div>
+              <div><p class="text-cyan-500 dark:text-cyan-400 font-bold mb-1">Izin</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="siswaIzin">0</p></div>
+              <div><p class="text-rose-500 dark:text-rose-400 font-bold mb-1">Alfa</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="siswaAlfa">0</p></div>
+              <div><p class="text-purple-600 dark:text-purple-400 font-bold mb-1">Total</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="siswaTotal">0</p></div>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden transition-colors duration-200">
             <div class="bg-[#4caf50] text-white px-5 py-3.5 flex justify-between items-center">
               <div>
                 <h3 class="font-semibold text-sm">Absensi Guru Hari Ini</h3>
@@ -174,25 +209,21 @@
               </div>
               <span class="text-[11px] bg-green-900/30 px-2 py-0.5 rounded font-mono" id="tglGuru">...</span>
             </div>
-            <div class="p-4 grid grid-cols-5 text-center divide-x divide-slate-100 text-xs">
-              <div><p class="text-emerald-600 font-bold mb-1">Hadir</p><p class="text-slate-700 font-semibold text-base" id="guruHadir">0</p></div>
-              <div><p class="text-amber-500 font-bold mb-1">Sakit</p><p class="text-slate-700 font-semibold text-base" id="guruSakit">0</p></div>
-              <div><p class="text-cyan-500 font-bold mb-1">Izin</p><p class="text-slate-700 font-semibold text-base" id="guruIzin">0</p></div>
-              <div><p class="text-rose-500 font-bold mb-1">Alfa</p><p class="text-slate-700 font-semibold text-base" id="guruAlfa">0</p></div>
-              <div><p class="text-purple-600 font-bold mb-1">Total</p><p class="text-slate-700 font-semibold text-base" id="guruTotal">0</p></div>
+            <div class="p-4 grid grid-cols-5 text-center divide-x divide-slate-100 dark:divide-slate-700 text-xs">
+              <div><p class="text-emerald-600 dark:text-emerald-400 font-bold mb-1">Hadir</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="guruHadir">0</p></div>
+              <div><p class="text-amber-500 dark:text-amber-400 font-bold mb-1">Sakit</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="guruSakit">0</p></div>
+              <div><p class="text-cyan-500 dark:text-cyan-400 font-bold mb-1">Izin</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="guruIzin">0</p></div>
+              <div><p class="text-rose-500 dark:text-rose-400 font-bold mb-1">Alfa</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="guruAlfa">0</p></div>
+              <div><p class="text-purple-600 dark:text-purple-400 font-bold mb-1">Total</p><p class="text-slate-700 dark:text-slate-200 font-semibold text-base" id="guruTotal">0</p></div>
             </div>
           </div>
         </div>
 
-        <!-- GRAFIK TINGKAT KEHADIRAN DENGAN FILTER KELAS LIVE -->
+        <!-- GRAFIK TINGKAT KEHADIRAN -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <!-- Grafik Siswa -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 md:p-5 space-y-3">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 md:p-5 space-y-3 transition-colors duration-200">
             <div class="flex items-center justify-between bg-[#9c27b0] text-white p-3 rounded-lg">
               <h4 class="font-semibold text-sm">Tingkat Kehadiran Siswa</h4>
-              
-              <!-- DROPDOWN FILTER KELAS -->
               <div class="flex items-center gap-1.5 text-slate-800">
                 <select id="selectKelas" onchange="fetchDashboardData()" class="text-xs bg-white border border-purple-200 rounded-md px-2 py-1 font-bold text-purple-900 focus:outline-none cursor-pointer shadow-sm">
                   <option value="SEMUA">Semua Kelas</option>
@@ -202,37 +233,35 @@
             <div class="h-56 relative"><canvas id="chartSiswa"></canvas></div>
           </div>
 
-          <!-- Grafik Guru -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 md:p-5 space-y-3">
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 md:p-5 space-y-3 transition-colors duration-200">
             <div class="flex items-center justify-between bg-[#4caf50] text-white p-3 rounded-lg">
               <h4 class="font-semibold text-sm">Tingkat Kehadiran Guru</h4>
               <span class="text-[10px] bg-emerald-800/30 px-2 py-0.5 rounded font-medium">Keseluruhan</span>
             </div>
             <div class="h-56 relative"><canvas id="chartGuru"></canvas></div>
           </div>
-
         </div>
       </div>
 
       <!-- ================= POS SCANNER QR ================= -->
       <div id="view-scanner" class="hidden max-w-md mx-auto space-y-4 text-center">
-        <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-bold text-slate-800 mb-1">Kamera Pos Absensi</h2>
-          <p class="text-xs text-slate-500 mb-4">Arahkan Kartu QR Code ke Kamera Handphone / Webcam</p>
+        <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">Kamera Pos Absensi</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Arahkan Kartu QR Code ke Kamera Handphone / Webcam</p>
 
-          <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
+          <div class="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl mb-4">
             <button id="btnMasuk" onclick="setScanMode('MASUK')" class="flex-1 py-2 font-semibold text-xs rounded-lg bg-emerald-600 text-white shadow-sm">☀️ Scan Masuk</button>
-            <button id="btnPulang" onclick="setScanMode('PULANG')" class="flex-1 py-2 font-semibold text-xs rounded-lg text-slate-600">🌙 Scan Pulang</button>
+            <button id="btnPulang" onclick="setScanMode('PULANG')" class="flex-1 py-2 font-semibold text-xs rounded-lg text-slate-600 dark:text-slate-300">🌙 Scan Pulang</button>
           </div>
 
           <div class="mb-3 text-left">
-            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Pilih Kamera:</label>
-            <select id="cameraSelect" onchange="changeCamera(this.value)" class="w-full border p-2 rounded-lg text-xs bg-slate-50 border-slate-300 outline-none">
+            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Pilih Kamera:</label>
+            <select id="cameraSelect" onchange="changeCamera(this.value)" class="w-full border p-2 rounded-lg text-xs bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 border-slate-300 outline-none">
               <option value="">Mengidentifikasi Kamera...</option>
             </select>
           </div>
 
-          <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-300 relative min-h-[220px] flex items-center justify-center">
+          <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-600 relative min-h-[220px] flex items-center justify-center">
             <div id="reader" class="w-full"></div>
           </div>
 
@@ -246,19 +275,19 @@
       </div>
 
       <!-- ================= DATA SISWA ================= -->
-      <div id="view-data-siswa" class="hidden bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div id="view-data-siswa" class="hidden bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 transition-colors duration-200">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-base md:text-lg font-bold text-slate-800">Data Siswa SMAN 8 Raja Ampat</h2>
-            <p class="text-xs text-slate-500">Daftar seluruh siswa terdaftar</p>
+            <h2 class="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100">Data Siswa SMA Negeri 8 Raja Ampat</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Daftar seluruh siswa terdaftar</p>
           </div>
           <button onclick="loadDataSiswa()" class="text-xs bg-cyan-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 font-semibold hover:bg-cyan-600">
             🔄 Refresh Data
           </button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left text-slate-600">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase font-semibold">
               <tr>
                 <th class="p-3">No</th>
                 <th class="p-3">ID Unik / NIS</th>
@@ -267,7 +296,7 @@
                 <th class="p-3">Jenis Kelamin</th>
               </tr>
             </thead>
-            <tbody id="tableSiswaBody" class="divide-y divide-slate-100">
+            <tbody id="tableSiswaBody" class="divide-y divide-slate-100 dark:divide-slate-700">
               <tr><td colspan="5" class="p-4 text-center text-slate-400">Klik Refresh untuk memuat data...</td></tr>
             </tbody>
           </table>
@@ -275,19 +304,19 @@
       </div>
 
       <!-- ================= DATA GURU ================= -->
-      <div id="view-data-guru" class="hidden bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div id="view-data-guru" class="hidden bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 transition-colors duration-200">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-base md:text-lg font-bold text-slate-800">Data Guru SMAN 8 Raja Ampat</h2>
-            <p class="text-xs text-slate-500">Daftar seluruh guru & tenaga pendidik</p>
+            <h2 class="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100">Data Guru SMA Negeri 8 Raja Ampat</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Daftar seluruh guru & tenaga pendidik</p>
           </div>
           <button onclick="loadDataGuru()" class="text-xs bg-emerald-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 font-semibold hover:bg-emerald-600">
             🔄 Refresh Data
           </button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left text-slate-600">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase font-semibold">
               <tr>
                 <th class="p-3">No</th>
                 <th class="p-3">ID Unik / NIP</th>
@@ -295,7 +324,7 @@
                 <th class="p-3">Mata Pelajaran / Jabatan</th>
               </tr>
             </thead>
-            <tbody id="tableGuruBody" class="divide-y divide-slate-100">
+            <tbody id="tableGuruBody" class="divide-y divide-slate-100 dark:divide-slate-700">
               <tr><td colspan="4" class="p-4 text-center text-slate-400">Klik Refresh untuk memuat data...</td></tr>
             </tbody>
           </table>
@@ -303,17 +332,17 @@
       </div>
 
       <!-- ================= ABSENSI SISWA ================= -->
-      <div id="view-absensi-siswa" class="hidden bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div id="view-absensi-siswa" class="hidden bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 transition-colors duration-200">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-base md:text-lg font-bold text-slate-800">Riwayat Absensi Siswa</h2>
-            <p class="text-xs text-slate-500">Catatan kehadiran siswa masuk & pulang hari ini</p>
+            <h2 class="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100">Riwayat Absensi Siswa</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Catatan kehadiran siswa masuk & pulang hari ini</p>
           </div>
           <button onclick="loadAbsensiLogs('SISWA')" class="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 font-semibold">🔄 Refresh Log</button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left text-slate-600">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase font-semibold">
               <tr>
                 <th class="p-3">Tanggal</th>
                 <th class="p-3">Waktu</th>
@@ -323,7 +352,7 @@
                 <th class="p-3">Tipe Scan</th>
               </tr>
             </thead>
-            <tbody id="tableAbsensiSiswaBody" class="divide-y divide-slate-100">
+            <tbody id="tableAbsensiSiswaBody" class="divide-y divide-slate-100 dark:divide-slate-700">
               <tr><td colspan="6" class="p-4 text-center text-slate-400">Memuat log absensi siswa...</td></tr>
             </tbody>
           </table>
@@ -331,17 +360,17 @@
       </div>
 
       <!-- ================= ABSENSI GURU ================= -->
-      <div id="view-absensi-guru" class="hidden bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div id="view-absensi-guru" class="hidden bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 transition-colors duration-200">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-base md:text-lg font-bold text-slate-800">Riwayat Absensi Guru</h2>
-            <p class="text-xs text-slate-500">Catatan kehadiran guru masuk & pulang hari ini</p>
+            <h2 class="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100">Riwayat Absensi Guru</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Catatan kehadiran guru masuk & pulang hari ini</p>
           </div>
           <button onclick="loadAbsensiLogs('GURU')" class="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 font-semibold">🔄 Refresh Log</button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left text-slate-600">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase font-semibold">
               <tr>
                 <th class="p-3">Tanggal</th>
                 <th class="p-3">Waktu</th>
@@ -351,7 +380,7 @@
                 <th class="p-3">Tipe Scan</th>
               </tr>
             </thead>
-            <tbody id="tableAbsensiGuruBody" class="divide-y divide-slate-100">
+            <tbody id="tableAbsensiGuruBody" class="divide-y divide-slate-100 dark:divide-slate-700">
               <tr><td colspan="6" class="p-4 text-center text-slate-400">Memuat log absensi guru...</td></tr>
             </tbody>
           </table>
@@ -360,24 +389,24 @@
 
       <!-- ================= GENERATE LAPORAN ================= -->
       <div id="view-generate-laporan" class="hidden space-y-6">
-        <div class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <h2 class="text-lg font-bold text-slate-800">Filter & Export Laporan Absensi</h2>
+        <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 transition-colors duration-200">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Filter & Export Laporan Absensi</h2>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
             <div>
-              <label class="block font-semibold mb-1">Kategori Target:</label>
-              <select id="lapKategori" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none">
+              <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Kategori Target:</label>
+              <select id="lapKategori" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none">
                 <option value="SEMUA">Semua (Siswa & Guru)</option>
                 <option value="SISWA">Khusus Siswa</option>
                 <option value="GURU">Khusus Guru</option>
               </select>
             </div>
             <div>
-              <label class="block font-semibold mb-1">Tanggal Mulai:</label>
-              <input type="date" id="lapTglMulai" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none">
+              <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Tanggal Mulai:</label>
+              <input type="date" id="lapTglMulai" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none">
             </div>
             <div>
-              <label class="block font-semibold mb-1">Tanggal Selesai:</label>
-              <input type="date" id="lapTglSelesai" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none">
+              <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Tanggal Selesai:</label>
+              <input type="date" id="lapTglSelesai" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none">
             </div>
             <div class="flex items-end">
               <button onclick="prosesGenerateLaporan()" class="w-full bg-cyan-500 text-white font-bold py-2.5 rounded-lg hover:bg-cyan-600 transition flex justify-center items-center gap-2">
@@ -387,18 +416,25 @@
           </div>
         </div>
 
-        <div id="printArea" class="bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div class="flex justify-between items-center border-b pb-4">
+        <div id="printArea" class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4 transition-colors duration-200">
+          <div class="flex justify-between items-center border-b dark:border-slate-700 pb-4">
             <div>
-              <h3 class="font-bold text-slate-800 text-base">LAPORAN REKAPITULASI ABSENSI</h3>
-              <p class="text-xs text-slate-500" id="lapSubtitle">SMAN 8 RAJA AMPAT</p>
+              <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">LAPORAN REKAPITULASI ABSENSI</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400" id="lapSubtitle">SMA NEGERI 8 RAJA AMPAT</p>
             </div>
-            <button onclick="window.print()" class="text-xs bg-slate-800 text-white px-3 py-2 rounded-lg font-semibold flex items-center gap-1.5"><i data-lucide="printer" class="w-3.5 h-3.5"></i> Cetak / PDF</button>
+            <div class="flex items-center gap-2">
+              <button onclick="exportLaporanToExcel()" class="text-xs bg-emerald-700 text-white px-3 py-2 rounded-lg font-semibold flex items-center gap-1.5 hover:bg-emerald-800 transition">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export Excel
+              </button>
+              <button onclick="window.print()" class="text-xs bg-slate-800 dark:bg-slate-700 text-white px-3 py-2 rounded-lg font-semibold flex items-center gap-1.5">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i> Cetak / PDF
+              </button>
+            </div>
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left text-slate-600">
-              <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+            <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+              <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase font-semibold">
                 <tr>
                   <th class="p-3">No</th>
                   <th class="p-3">Tanggal</th>
@@ -410,7 +446,7 @@
                   <th class="p-3">Ket Scan</th>
                 </tr>
               </thead>
-              <tbody id="tableLaporanBody" class="divide-y divide-slate-100">
+              <tbody id="tableLaporanBody" class="divide-y divide-slate-100 dark:divide-slate-700">
                 <tr><td colspan="8" class="p-4 text-center text-slate-400">Silakan klik tombol "Tampilkan Laporan" di atas.</td></tr>
               </tbody>
             </table>
@@ -419,27 +455,27 @@
       </div>
 
       <!-- ================= PENGATURAN ================= -->
-      <div id="view-pengaturan" class="hidden bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-6">
+      <div id="view-pengaturan" class="hidden bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-2xl mx-auto space-y-6 transition-colors duration-200">
         <div>
-          <h2 class="text-lg font-bold text-slate-800">Pengaturan Aplikasi & Koneksi</h2>
-          <p class="text-xs text-slate-500">Kelola URL Web App Google Apps Script dan Profil Sekolah</p>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Pengaturan Aplikasi & Koneksi</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Kelola URL Web App Google Apps Script dan Profil Sekolah</p>
         </div>
 
         <form onsubmit="savePengaturan(event)" class="space-y-4 text-xs">
           <div>
-            <label class="block font-semibold mb-1">URL Deployment Google Apps Script (GAS):</label>
-            <input type="url" id="cfgGasUrl" required placeholder="https://script.google.com/macros/s/.../exec" class="w-full border p-2.5 rounded-lg border-slate-300 font-mono text-xs outline-none focus:border-cyan-500">
-            <p class="text-[11px] text-slate-400 mt-1">Tempelkan URL Web App dari Google Apps Script Anda di sini.</p>
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">URL Deployment Google Apps Script (GAS):</label>
+            <input type="url" id="cfgGasUrl" required placeholder="https://script.google.com/macros/s/.../exec" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-mono text-xs outline-none focus:border-cyan-500">
+            <p class="text-[11px] text-slate-400 mt-1">URL Web App terhubung secara otomatis ke database Google Apps Script.</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block font-semibold mb-1">Nama Sekolah / Instansi:</label>
-              <input type="text" id="cfgNamaSekolah" value="SMAN 8 RAJA AMPAT" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none">
+              <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Nama Sekolah / Instansi:</label>
+              <input type="text" id="cfgNamaSekolah" value="SMA NEGERI 8 RAJA AMPAT" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none">
             </div>
             <div>
-              <label class="block font-semibold mb-1">Operator Pengelola:</label>
-              <input type="text" id="cfgOperator" value="SUPERADMIN" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none">
+              <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Operator Pengelola:</label>
+              <input type="text" id="cfgOperator" value="PETUGAS ABSENSI" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none">
             </div>
           </div>
 
@@ -452,22 +488,22 @@
       </div>
 
       <!-- ================= GENERATE QR ================= -->
-      <div id="view-generate-qr" class="hidden bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm max-w-md mx-auto">
-        <h2 class="text-lg font-bold text-slate-800 mb-2">Generator Kartu QR Code</h2>
-        <p class="text-xs text-slate-500 mb-4">Masukkan data pengguna untuk mencetak ID Card</p>
+      <div id="view-generate-qr" class="hidden bg-white dark:bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-md mx-auto transition-colors duration-200">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Generator Kartu QR Code</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Masukkan data pengguna untuk mencetak ID Card</p>
 
         <form id="qrForm" onsubmit="generateCard(event)" class="space-y-3 text-xs">
           <div>
-            <label class="block font-semibold mb-1">ID Unik (NIP / NIS):</label>
-            <input type="text" id="inputID" required placeholder="Contoh: SCH-GURU-001" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none focus:border-cyan-500">
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">ID Unik (NIP / NIS):</label>
+            <input type="text" id="inputID" required placeholder="Contoh: SCH-GURU-001" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:border-cyan-500">
           </div>
           <div>
-            <label class="block font-semibold mb-1">Nama Lengkap:</label>
-            <input type="text" id="inputNama" required placeholder="Contoh: Ahmad Dahlan, M.Pd" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none focus:border-cyan-500">
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Nama Lengkap:</label>
+            <input type="text" id="inputNama" required placeholder="Contoh: Ahmad Dahlan, M.Pd" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:border-cyan-500">
           </div>
           <div>
-            <label class="block font-semibold mb-1">Peran / Jabatan:</label>
-            <select id="inputPeran" class="w-full border p-2.5 rounded-lg border-slate-300 outline-none">
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Peran / Jabatan:</label>
+            <select id="inputPeran" class="w-full border p-2.5 rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 outline-none">
               <option value="Guru">Guru</option>
               <option value="Kepala Sekolah">Kepala Sekolah</option>
               <option value="Siswa">Siswa</option>
@@ -476,30 +512,40 @@
           <button type="submit" class="w-full bg-cyan-500 text-white font-bold py-2.5 rounded-lg shadow hover:bg-cyan-600">Buat QR Code</button>
         </form>
 
-        <div id="printableCard" class="hidden mt-6 border-2 border-dashed border-slate-300 p-4 rounded-xl text-center bg-slate-50">
-          <p class="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">SMAN 8 RAJA AMPAT</p>
-          <h3 id="cardNama" class="font-bold text-slate-800 text-sm mt-1">--</h3>
-          <p id="cardPeran" class="text-xs text-cyan-600 font-semibold">--</p>
-          <div id="qrcode" class="flex justify-center my-3"></div>
-          <p id="cardID" class="text-[11px] font-mono text-slate-500">--</p>
-          <button onclick="window.print()" class="mt-4 px-4 py-1.5 bg-slate-800 text-white text-xs rounded-md">𖥕 Cetak Kartu</button>
+        <div id="printableCard" class="hidden mt-6 border-2 border-dashed border-slate-300 dark:border-slate-600 p-4 rounded-xl text-center bg-slate-50 dark:bg-slate-900">
+          <img id="cardLogo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgm1RML72f-C_B7lxppP2uTyCicbTRkYyX5o_lpL-6T4vv-ZLuf1I0AO1j_Bda_JT9fNX4SflT56xsyT4Q43Hu98nqHIuGGY30iupbiLvEwsKNEh46Fw-lacUpepFJ9bu69VxMP3DCtkXERPHkyIgVJSb99E16G9mfmb_xb-KFV9iPcGDoK9kH66S_tJZIm/s591/WhatsApp_Image_2025-08-01_at_05.50.39-removebg-preview.png" alt="Logo Sekolah" class="w-12 h-12 mx-auto mb-1 object-contain" crossorigin="anonymous">
+          <p class="text-[10px] uppercase tracking-wider font-extrabold text-slate-500 dark:text-slate-400">SMA NEGERI 8 RAJA AMPAT</p>
+          <h3 id="cardNama" class="font-bold text-slate-800 dark:text-slate-100 text-sm mt-1">--</h3>
+          <p id="cardPeran" class="text-xs text-cyan-600 dark:text-cyan-400 font-semibold">--</p>
+          <div id="qrcode" class="flex justify-center my-3 p-2 bg-white rounded-lg w-fit mx-auto"></div>
+          <p id="cardID" class="text-[11px] font-mono text-slate-500 dark:text-slate-400">--</p>
+          
+          <div class="mt-4 flex gap-2 justify-center">
+            <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded-md hover:bg-slate-700">𖥕 Cetak Kartu</button>
+            <button onclick="downloadCardPNG()" class="px-3 py-1.5 bg-emerald-600 text-white text-xs rounded-md hover:bg-emerald-700 flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Download PNG
+            </button>
+          </div>
         </div>
       </div>
 
     </main>
 
-    <footer class="mt-auto p-4 flex justify-between text-xs text-slate-400 bg-slate-100 border-t border-slate-200">
-      <span><strong id="footerTitle">SMAN 8 RAJA AMPAT PWA</strong></span>
+    <!-- FOOTER TELAH DIPERBARUI (PWTH) -->
+    <footer class="mt-auto p-4 flex justify-between text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <span><strong id="footerTitle">SMA NEGERI 8 RAJA AMPAT PWTH</strong></span>
       <span>© 2026 Hak Cipta Dilindungi.</span>
     </footer>
 
   </div>
 
   <!-- ========================================== -->
-  <!-- 3. JAVASCRIPT LOGIC (TERHUBUNG LENGKAP)    -->
+  <!-- 3. JAVASCRIPT LOGIC                        -->
   <!-- ========================================== -->
   <script>
-    let GAS_API_URL = localStorage.getItem('GAS_API_URL') || "";
+    // URL Deployment GAS Terintegrasi Langsung
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbwhJiarhonvPHIXIJY_mQJ4g80qDqTutNgYgOaBPTt5rMI4XS_vMmYJfAfIintCiwg/exec";
+    let GAS_API_URL = localStorage.getItem('GAS_API_URL') || DEFAULT_GAS_URL;
 
     let currentScanMode = "MASUK";
     let isProcessingScan = false;
@@ -510,6 +556,75 @@
     let chartGuruObj = null;
 
     const views = ['dashboard', 'scanner', 'generate-qr', 'data-siswa', 'data-guru', 'absensi-siswa', 'absensi-guru', 'generate-laporan', 'pengaturan'];
+
+    // --- FITUR DARK MODE ---
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateChartColors(isDark);
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    // --- FITUR FULLSCREEN ---
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          alert(`Error saat mengaktifkan layar penuh: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    function playBeepSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {
+        console.log("Audio Web API tidak didukung");
+      }
+    }
+
+    function exportLaporanToExcel() {
+      const table = document.querySelector("#printArea table");
+      if (!table) return alert("Tabel laporan tidak ditemukan!");
+
+      const rows = table.querySelectorAll("tbody tr");
+      if (rows.length === 0 || rows[0].innerText.includes("Silakan klik")) {
+        alert("Tidak ada data laporan yang bisa diunduh. Silakan tampilkan laporan terlebih dahulu!");
+        return;
+      }
+
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Laporan Absensi" });
+      const kategori = document.getElementById("lapKategori").value;
+      const tglMulai = document.getElementById("lapTglMulai").value || "Semua";
+      const tglSelesai = document.getElementById("lapTglSelesai").value || "Semua";
+      
+      XLSX.writeFile(wb, `Laporan_Absensi_${kategori}_${tglMulai}_sd_${tglSelesai}.xlsx`);
+    }
 
     function switchMenu(menuTarget) {
       if(menuTarget !== 'scanner') {
@@ -525,7 +640,7 @@
       if(targetView) targetView.classList.remove('hidden');
 
       document.querySelectorAll('aside nav button').forEach(btn => {
-        btn.className = "whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition";
+        btn.className = "whitespace-nowrap flex items-center gap-2.5 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition";
       });
 
       const activeBtn = document.getElementById(`menu-${menuTarget}`);
@@ -541,7 +656,6 @@
       if(menuTarget === 'absensi-guru') loadAbsensiLogs('GURU');
     }
 
-    // A. FETCH REALTIME DASHBOARD & DYNAMIC CLASS FILTER
     async function fetchDashboardData() {
       const dot = document.getElementById("statusDot");
       const txt = document.getElementById("statusText");
@@ -578,7 +692,6 @@
       }
     }
 
-    // B. UPDATE DROPDOWN KELAS OTOMATIS
     function updateDropdownKelas(daftarKelas, currentSelected) {
       const selectEl = document.getElementById("selectKelas");
       if (!selectEl || !daftarKelas) return;
@@ -593,7 +706,6 @@
       selectEl.innerHTML = html;
     }
 
-    // C. RENDER DATA KE ELEMEN HTML & GRAFIK
     function renderDashboardData(data) {
       const sHariIni = data.siswaHariIni || (data.rekapHariIni ? data.rekapHariIni.siswa : null);
       const gHariIni = data.guruHariIni || (data.rekapHariIni ? data.rekapHariIni.guru : null);
@@ -629,15 +741,23 @@
       if (data.grafikGuru && chartGuruObj)  updateChartData(chartGuruObj, data.grafikGuru);
     }
 
-    // D. INISIALISASI & UPDATE CHART.JS
     function initCharts() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? '#334155' : '#f1f5f9';
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+
       const baseOpt = {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+        plugins: { 
+          legend: { 
+            position: 'bottom', 
+            labels: { boxWidth: 12, font: { size: 11 }, color: textColor } 
+          } 
+        },
         scales: {
-          y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-          x: { grid: { color: '#f1f5f9' } }
+          y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
+          x: { grid: { color: gridColor }, ticks: { color: textColor } }
         }
       };
 
@@ -656,6 +776,22 @@
       });
     }
 
+    function updateChartColors(isDark) {
+      const gridColor = isDark ? '#334155' : '#f1f5f9';
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+
+      [chartSiswaObj, chartGuruObj].forEach(chart => {
+        if(chart) {
+          chart.options.scales.x.grid.color = gridColor;
+          chart.options.scales.y.grid.color = gridColor;
+          chart.options.scales.x.ticks.color = textColor;
+          chart.options.scales.y.ticks.color = textColor;
+          chart.options.plugins.legend.labels.color = textColor;
+          chart.update();
+        }
+      });
+    }
+
     function updateChartData(chart, listData) {
       chart.data.labels = listData.map(d => d.tanggal);
       chart.data.datasets[0].data = listData.map(d => d.hadir);
@@ -663,7 +799,6 @@
       chart.update();
     }
 
-    // E. KAMERA SCANNER QR
     async function initCameraDevices() {
       const cameraSelect = document.getElementById('cameraSelect');
       cameraSelect.innerHTML = '<option value="">Mengakses izin kamera...</option>';
@@ -726,6 +861,7 @@
             const result = await res.json();
 
             if (result.status === "success") {
+              playBeepSound();
               showScanStatus("success", `✅ ${result.message}`, `${result.data.nama} (${result.data.peran}) - ${result.data.waktu} WIT`);
               fetchDashboardData();
             } else {
@@ -756,18 +892,26 @@
 
     function setScanMode(mode) {
       currentScanMode = mode;
-      document.getElementById('btnMasuk').className = mode === "MASUK" ? "flex-1 py-2 font-semibold text-xs rounded-lg bg-emerald-600 text-white shadow-sm" : "flex-1 py-2 font-semibold text-xs rounded-lg text-slate-600";
-      document.getElementById('btnPulang').className = mode === "PULANG" ? "flex-1 py-2 font-semibold text-xs rounded-lg bg-blue-600 text-white shadow-sm" : "flex-1 py-2 font-semibold text-xs rounded-lg text-slate-600";
+      document.getElementById('btnMasuk').className = mode === "MASUK" ? "flex-1 py-2 font-semibold text-xs rounded-lg bg-emerald-600 text-white shadow-sm" : "flex-1 py-2 font-semibold text-xs rounded-lg text-slate-600 dark:text-slate-300";
+      document.getElementById('btnPulang').className = mode === "PULANG" ? "flex-1 py-2 font-semibold text-xs rounded-lg bg-blue-600 text-white shadow-sm" : "flex-1 py-2 font-semibold text-xs rounded-lg text-slate-600 dark:text-slate-300";
     }
 
     function showScanStatus(type, title, msg) {
       const box = document.getElementById('scanStatusBox');
-      box.classList.remove('hidden', 'bg-emerald-50', 'bg-rose-50', 'bg-amber-50');
-      box.classList.add(type === 'success' ? 'bg-emerald-50' : type === 'failed' ? 'bg-rose-50' : 'bg-amber-50');
+      box.classList.remove('hidden', 'bg-emerald-50', 'bg-rose-50', 'bg-amber-50', 'dark:bg-emerald-950/50', 'dark:bg-rose-950/50', 'dark:bg-amber-950/50');
+      
+      const isDark = document.documentElement.classList.contains('dark');
+      if (type === 'success') {
+        box.classList.add(isDark ? 'bg-emerald-950/50' : 'bg-emerald-50');
+      } else if (type === 'failed') {
+        box.classList.add(isDark ? 'bg-rose-950/50' : 'bg-rose-50');
+      } else {
+        box.classList.add(isDark ? 'bg-amber-950/50' : 'bg-amber-50');
+      }
+      
       box.innerHTML = `<strong>${title}</strong><br>${msg}`;
     }
 
-    // F. DATA SISWA & GURU LOADER
     async function loadDataSiswa() {
       const tbody = document.getElementById('tableSiswaBody');
       tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Sedang mengambil data siswa...</td></tr>';
@@ -782,10 +926,10 @@
           tbody.innerHTML = '';
           result.data.forEach((row, index) => {
             tbody.innerHTML += `
-              <tr class="hover:bg-slate-50 border-b border-slate-100">
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
                 <td class="p-3">${index + 1}</td>
-                <td class="p-3 font-mono font-semibold text-cyan-600">${row[0]}</td>
-                <td class="p-3 font-medium text-slate-800">${row[1]}</td>
+                <td class="p-3 font-mono font-semibold text-cyan-600 dark:text-cyan-400">${row[0]}</td>
+                <td class="p-3 font-medium text-slate-800 dark:text-slate-200">${row[1]}</td>
                 <td class="p-3">${row[2] || '-'}</td>
                 <td class="p-3">${row[3] || '-'}</td>
               </tr>`;
@@ -812,10 +956,10 @@
           tbody.innerHTML = '';
           result.data.forEach((row, index) => {
             tbody.innerHTML += `
-              <tr class="hover:bg-slate-50 border-b border-slate-100">
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
                 <td class="p-3">${index + 1}</td>
-                <td class="p-3 font-mono font-semibold text-emerald-600">${row[0]}</td>
-                <td class="p-3 font-medium text-slate-800">${row[1]}</td>
+                <td class="p-3 font-mono font-semibold text-emerald-600 dark:text-emerald-400">${row[0]}</td>
+                <td class="p-3 font-medium text-slate-800 dark:text-slate-200">${row[1]}</td>
                 <td class="p-3">${row[2] || '-'}</td>
               </tr>`;
           });
@@ -842,12 +986,12 @@
           tbody.innerHTML = '';
           result.data.forEach(row => {
             tbody.innerHTML += `
-              <tr class="hover:bg-slate-50 border-b border-slate-100">
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
                 <td class="p-3">${row[0]}</td>
                 <td class="p-3 font-mono">${row[1]}</td>
-                <td class="p-3 font-mono font-semibold text-slate-700">${row[2]}</td>
-                <td class="p-3 font-medium text-slate-800">${row[4]}</td>
-                <td class="p-3"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">${row[5]}</span></td>
+                <td class="p-3 font-mono font-semibold text-slate-700 dark:text-slate-300">${row[2]}</td>
+                <td class="p-3 font-medium text-slate-800 dark:text-slate-200">${row[4]}</td>
+                <td class="p-3"><span class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px]">${row[5]}</span></td>
                 <td class="p-3">${row[6]}</td>
               </tr>`;
           });
@@ -872,14 +1016,14 @@
           tbody.innerHTML = '';
           result.data.forEach((row, i) => {
             tbody.innerHTML += `
-              <tr class="hover:bg-slate-50 border-b border-slate-100">
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
                 <td class="p-3">${i + 1}</td>
                 <td class="p-3">${row[0]}</td>
                 <td class="p-3 font-mono">${row[1]}</td>
                 <td class="p-3 font-mono font-semibold">${row[2]}</td>
                 <td class="p-3">${row[3]}</td>
-                <td class="p-3 font-medium text-slate-800">${row[4]}</td>
-                <td class="p-3"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">${row[5]}</span></td>
+                <td class="p-3 font-medium text-slate-800 dark:text-slate-200">${row[4]}</td>
+                <td class="p-3"><span class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-bold text-[10px]">${row[5]}</span></td>
                 <td class="p-3">${row[6]}</td>
               </tr>`;
           });
@@ -899,8 +1043,7 @@
       localStorage.setItem('GAS_API_URL', newUrl);
       GAS_API_URL = newUrl;
 
-      document.getElementById('sidebarSub').innerText = namaSekolah;
-      document.getElementById('footerTitle').innerText = `${namaSekolah} PWA`;
+      document.getElementById('footerTitle').innerText = `${namaSekolah} PWTH`;
 
       alert("✅ Pengaturan berhasil disimpan!");
       fetchDashboardData();
@@ -923,6 +1066,74 @@
       document.getElementById('printableCard').classList.remove('hidden');
     }
 
+    // --- FITUR DOWNLOAD CARD DALAM FORMAT PNG ---
+    function downloadCardPNG() {
+      const nama = document.getElementById('cardNama').innerText;
+      const peran = document.getElementById('cardPeran').innerText;
+      const id = document.getElementById('cardID').innerText;
+      const qrImg = document.querySelector("#qrcode img") || document.querySelector("#qrcode canvas");
+
+      if (!qrImg) {
+        alert("Kartu QR Code belum dibuat!");
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 320;
+      canvas.height = 420;
+
+      // Background Card
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Border Card
+      ctx.strokeStyle = "#00bcd4";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+      // Header Text
+      ctx.fillStyle = "#64748b";
+      ctx.font = "bold 11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("SMA NEGERI 8 RAJA AMPAT", canvas.width / 2, 40);
+
+      // Nama User
+      ctx.fillStyle = "#1e293b";
+      ctx.font = "bold 16px sans-serif";
+      ctx.fillText(nama, canvas.width / 2, 70);
+
+      // Peran User
+      ctx.fillStyle = "#00bcd4";
+      ctx.font = "bold 13px sans-serif";
+      ctx.fillText(peran, canvas.width / 2, 90);
+
+      // Gambar QR Code
+      const qrImageObj = new Image();
+      qrImageObj.crossOrigin = "anonymous";
+      qrImageObj.src = qrImg.src || qrImg.toDataURL("image/png");
+
+      qrImageObj.onload = function() {
+        ctx.drawImage(qrImageObj, (canvas.width - 150) / 2, 110, 150, 150);
+
+        // ID Unik Text
+        ctx.fillStyle = "#64748b";
+        ctx.font = "12px monospace";
+        ctx.fillText(id, canvas.width / 2, 285);
+
+        // Footer Text Card
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "10px sans-serif";
+        ctx.fillText("KARTU ABSENSI RESMI", canvas.width / 2, 380);
+
+        // Trigger Download
+        const link = document.createElement('a');
+        link.download = `QR_Card_${id}_${nama.replace(/\s+/g, '_')}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      };
+    }
+
     function showGasError(tbody, colSpan) {
       tbody.innerHTML = `<tr><td colspan="${colSpan}" class="p-4 text-center text-rose-500 font-medium">Atur URL Apps Script di menu Pengaturan.</td></tr>`;
     }
@@ -935,37 +1146,35 @@
         selectedKelas: selectedKelas,
         daftarKelas: daftar,
         totalSiswaKeseluruhan: 47,
-        siswaHariIni: { tanggal: "2026-07-27", hadir: 0, sakit: 0, izin: 0, alfa: isAll ? 47 : 12, total: isAll ? 47 : 12 },
-        guruHariIni:  { tanggal: "2026-07-27", hadir: 0, sakit: 0, izin: 0, alfa: 21, total: 21 },
+        siswaHariIni: { tanggal: "2026-07-31", hadir: 0, sakit: 0, izin: 0, alfa: isAll ? 47 : 12, total: isAll ? 47 : 12 },
+        guruHariIni:  { tanggal: "2026-07-31", hadir: 0, sakit: 0, izin: 0, alfa: 21, total: 21 },
         grafikSiswa: [
-          { tanggal: "21 Jul", hadir: isAll ? 22 : 8, alfa: isAll ? 1 : 0 }, 
-          { tanggal: "22 Jul", hadir: isAll ? 23 : 9, alfa: isAll ? 0 : 0 },
-          { tanggal: "23 Jul", hadir: isAll ? 22 : 8, alfa: isAll ? 1 : 1 }, 
-          { tanggal: "24 Jul", hadir: isAll ? 22 : 9, alfa: isAll ? 1 : 0 },
-          { tanggal: "25 Jul", hadir: isAll ? 20 : 7, alfa: isAll ? 2 : 1 }, 
-          { tanggal: "26 Jul", hadir: isAll ? 23 : 9, alfa: isAll ? 2 : 0 },
+          { tanggal: "25 Jul", hadir: isAll ? 22 : 8, alfa: isAll ? 1 : 0 }, 
+          { tanggal: "26 Jul", hadir: isAll ? 23 : 9, alfa: isAll ? 0 : 0 },
+          { tanggal: "27 Jul", hadir: isAll ? 22 : 8, alfa: isAll ? 1 : 1 }, 
+          { tanggal: "28 Jul", hadir: isAll ? 22 : 9, alfa: isAll ? 0 : 0 },
+          { tanggal: "29 Jul", hadir: isAll ? 20 : 7, alfa: isAll ? 2 : 1 }, 
+          { tanggal: "30 Jul", hadir: isAll ? 23 : 9, alfa: isAll ? 2 : 0 },
           { tanggal: "Hari ini", hadir: 0, alfa: isAll ? 47 : 12 }
         ],
         grafikGuru: [
-          { tanggal: "21 Jul", hadir: 22, alfa: 0 }, { tanggal: "22 Jul", hadir: 20, alfa: 1 },
-          { tanggal: "23 Jul", hadir: 21, alfa: 0 }, { tanggal: "24 Jul", hadir: 20, alfa: 0 },
-          { tanggal: "25 Jul", hadir: 18, alfa: 0 }, { tanggal: "26 Jul", hadir: 20, alfa: 1 },
+          { tanggal: "25 Jul", hadir: 22, alfa: 0 }, { tanggal: "26 Jul", hadir: 20, alfa: 1 },
+          { tanggal: "27 Jul", hadir: 21, alfa: 0 }, { tanggal: "28 Jul", hadir: 20, alfa: 0 },
+          { tanggal: "29 Jul", hadir: 18, alfa: 0 }, { tanggal: "30 Jul", hadir: 20, alfa: 1 },
           { tanggal: "Hari ini", hadir: 0, alfa: 21 }
         ]
       };
     }
 
-    // INIT INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
       lucide.createIcons();
       initCharts();
 
-      if(GAS_API_URL) {
-        document.getElementById('cfgGasUrl').value = GAS_API_URL;
-      }
+      document.getElementById('cfgGasUrl').value = GAS_API_URL;
       
       fetchDashboardData();
-      setInterval(fetchDashboardData, 10000); // Auto-sync 10 detik
+      setInterval(fetchDashboardData, 10000);
     });
   </script>
 </body>
